@@ -1,0 +1,33 @@
+{
+  "model_url": "/local/home-3d/sample-home.glb",
+  "panel_mode": "slide-over",
+  "areas": [
+    {
+      "id": "living_room",
+      "name": "Living Room",
+      "color": "#a78bfa",
+      "mesh_names": ["area_living_room"],
+      "ha_area_id": "living_room",
+      "sensors": ["sensor.living_temperature", "binary_sensor.living_presence"],
+      "appliances": ["light.living_main", "climate.living_ac", "media_player.living_tv"]
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "color": "#38bdf8",
+      "mesh_names": ["area_kitchen"],
+      "ha_area_id": "kitchen",
+      "sensors": ["sensor.kitchen_temperature", "sensor.kitchen_humidity"],
+      "appliances": ["light.kitchen_spots", "switch.coffee_maker"]
+    },
+    {
+      "id": "bedroom",
+      "name": "Bedroom",
+      "color": "#fb7185",
+      "mesh_names": ["area_bedroom"],
+      "ha_area_id": "bedroom",
+      "sensors": ["sensor.bedroom_temperature", "binary_sensor.bedroom_motion"],
+      "appliances": ["light.master_bedroom", "fan.master_ceiling"]
+    }
+  ]
+}
