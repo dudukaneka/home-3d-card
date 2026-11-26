@@ -1,7 +1,10 @@
 # Changelog & Project Log
 
-## [0.4.0] - 2026-11-26 (Public HACS Distribution)
-- **Public HACS Packaging:** Removed personal floorplan assets from the repository (replaced with synthetic [examples/sample-home/sample-home.glb](examples/sample-home/sample-home.glb) for CI validation and standalone dev preview) so `home-3d-card` can be installed and updated natively via HACS with automatic cache-busting.
+## [0.4.1] - 2026-11-26 (Home Assistant Marketplace Standard)
+- **Marketplace Documentation:** Updated README, CI workflow labels, and decision logs from HACS to Home Assistant 2026.11's native **Marketplace** standard (`Settings → Marketplace`).
+
+## [0.4.0] - 2026-11-26 (Public Marketplace Distribution)
+- **Public Marketplace Packaging:** Removed personal floorplan assets from the repository (replaced with synthetic [examples/sample-home/sample-home.glb](examples/sample-home/sample-home.glb) for CI validation and standalone dev preview) so `home-3d-card` can be installed and updated natively via Home Assistant Marketplace with automatic cache-busting.
 
 ## [0.3.1] - 2026-11-26 (HA Terminal Scripts)
 - Added POSIX `sh` install and update helper scripts (`scripts/ha-install.sh`, `scripts/ha-update.sh`) and `.gitattributes` `LF` normalization.

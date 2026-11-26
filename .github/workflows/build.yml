@@ -1,4 +1,4 @@
-name: Build & Validate HACS Card
+name: Build & Validate Marketplace Card
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
       - name: Typecheck & unit tests
         run: npm run typecheck && npm test
 
-      - name: Build HACS bundle
+      - name: Build Marketplace bundle
         run: npm run build
 
       - name: Validate GLB and area config

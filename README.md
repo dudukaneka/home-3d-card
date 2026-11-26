@@ -1,11 +1,11 @@
 # Home 3D Dashboard Card (`home-3d-card`)
 
-Interactive, user-agnostic 3D floorplan custom Lovelace card for **Home Assistant**, built with **Three.js**, **Lit**, and **TypeScript**, installable directly via **HACS**.
+Interactive, user-agnostic 3D floorplan custom Lovelace card for **Home Assistant**, built with **Three.js**, **Lit**, and **TypeScript**, installable directly via Home Assistant's **Marketplace** (2026.11+).
 
 Point it at **any** `.glb` 3D home model (exported from SolidCraft, Blender, Fusion, SketchUp, Sweet Home 3D, etc.), click rooms or exterior zones to zoom in, and view/control each area's sensors and appliances.
 
 ## Features
-- **1-Click HACS Installs & Updates:** Installs natively through HACS with automatic cache-busting (`?hacstag=...`).
+- **1-Click Marketplace Installs & Updates:** Installs natively through **Settings → Marketplace** with automatic resource management and cache-busting.
 - **Any `.glb` Model:** Auto-detects Z-up vs. Y-up orientation and normalizes scale and ground placement automatically.
 - **Drag-and-Drop / Upload `.glb`:** Upload any `.glb` directly inside the card onboarding view or Lovelace visual editor (`idb://<filename>`, persisted in browser IndexedDB), or host in `/config/www/` (`/local/...`) for automatic multi-device sync.
 - **Visual Mesh & Area Mapper:** Inspect any `.glb` right inside the Lovelace Card Editor (`Upload .glb` or `Inspect URL`), auto-create areas, click mesh chips, and bind each area to a Home Assistant Area (`hass.areas`) without writing YAML.
@@ -15,11 +15,12 @@ Point it at **any** `.glb` 3D home model (exported from SolidCraft, Blender, Fus
 
 ---
 
-## Installation via HACS (Recommended)
+## Installation via Home Assistant Marketplace (Recommended)
 
-1. Open **HACS → Frontend → ⋮ (top-right) → Custom repositories**.
-2. Add `https://github.com/dudukaneka/home-3d-card` with category **Dashboard** (or **Lovelace**), then click **Download**.
-3. Reload your browser when prompted by HACS.
+1. Open **Settings → Marketplace** (accept the community disclaimer and link your GitHub account if prompted).
+2. Click **⋮ (top-right) → Custom repositories**.
+3. Add `https://github.com/dudukaneka/home-3d-card` with category **Dashboard** (or **Lovelace**), then click **Download**.
+4. Reload your browser when prompted.
 4. *(For multi-device `.glb` hosting)* Copy your personal `.glb` model into Home Assistant at:
    ```text
    /config/www/home-3d/my-home.glb

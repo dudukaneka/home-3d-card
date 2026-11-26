@@ -12,5 +12,5 @@
 ## ADR-003: Area Detail Presentation (`panel_mode`)
 - **Decision:** Support `panel_mode: "slide-over"` (default) and `panel_mode: "fullscreen"` in Lovelace YAML and the visual card editor.
 
-## ADR-004: Public HACS Card Distribution
-- **Decision:** Keep `home-3d-card` user-agnostic and public on GitHub with `hacs.json` and tagged GitHub Releases (`dist/home-3d-card.js`), while users keep their personal `.glb` floorplan files privately on their Home Assistant host (`/config/www/home-3d/`).
+## ADR-004: Public Marketplace Card Distribution
+- **Decision:** Keep `home-3d-card` user-agnostic and public on GitHub with the standard repository manifest (`hacs.json`) and tagged GitHub Releases (`dist/home-3d-card.js`) for Home Assistant **Marketplace** (2026.11+), while users keep their personal `.glb` floorplan files privately on their Home Assistant host (`/config/www/home-3d/`).
