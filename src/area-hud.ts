@@ -31,6 +31,7 @@ export class Home3DAreaHud extends LitElement {
       background: var(--ha-card-background, rgba(15, 23, 42, 0.92));
       backdrop-filter: blur(14px);
       overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .hud.slide-over {
@@ -38,7 +39,8 @@ export class Home3DAreaHud extends LitElement {
       top: 12px;
       right: 12px;
       bottom: 12px;
-      width: min(350px, calc(100% - 24px));
+      width: clamp(360px, 34%, 480px);
+      max-width: calc(100% - 24px);
       border-radius: 14px;
       border: 1px solid rgba(148, 163, 184, 0.24);
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
@@ -153,15 +155,18 @@ export class Home3DAreaHud extends LitElement {
     .grid {
       display: grid;
       gap: 8px;
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .hud.fullscreen .grid {
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
     }
 
     .sensor-card,
     .appliance-card {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -187,7 +192,9 @@ export class Home3DAreaHud extends LitElement {
     }
 
     .entity-meta {
+      flex: 1 1 auto;
       min-width: 0;
+      overflow: hidden;
     }
 
     .entity-name {
@@ -207,6 +214,10 @@ export class Home3DAreaHud extends LitElement {
     }
 
     .entity-state {
+      flex-shrink: 0;
+      max-width: 45%;
+      overflow: hidden;
+      text-overflow: ellipsis;
       font-size: 0.85rem;
       font-weight: 700;
       text-align: right;
@@ -217,6 +228,7 @@ export class Home3DAreaHud extends LitElement {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .pill-toggle {

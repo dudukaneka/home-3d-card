@@ -76,6 +76,13 @@ describe('ha-helpers', () => {
     const hass = makeMockHass();
     expect(formatEntityState(hass.states['sensor.living_temp'])).toBe('22.5 °C');
     expect(formatEntityState(hass.states['climate.living_ac'])).toBe('cool · 21° (22.5°)');
+    expect(
+      formatEntityState({
+        entity_id: 'sensor.brush_left',
+        state: '289.8177777',
+        attributes: {},
+      }),
+    ).toBe('289.82');
   });
 
   it('calls appropriate Home Assistant services when toggling appliances', async () => {

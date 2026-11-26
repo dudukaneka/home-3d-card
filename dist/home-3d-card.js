@@ -655,12 +655,12 @@ function hh(i) {
 }
 function yl(i) {
   if (Ns(i.entity_id) === "climate") {
-    const n = i.attributes.temperature, s = i.attributes.current_temperature;
-    if (n !== void 0)
-      return `${i.state} · ${n}°${s !== void 0 ? ` (${s}°)` : ""}`;
+    const s = i.attributes.temperature, r = i.attributes.current_temperature;
+    if (s !== void 0)
+      return `${i.state} · ${s}°${r !== void 0 ? ` (${r}°)` : ""}`;
   }
-  const t = i.attributes.unit_of_measurement;
-  return t ? `${i.state} ${t}` : i.state;
+  const t = /^-?\d+\.\d{4,}$/.test(i.state.trim()) ? Number(i.state).toFixed(2) : i.state, n = i.attributes.unit_of_measurement;
+  return n ? `${t} ${n}` : t;
 }
 async function Uu(i, e) {
   if (!i) return;
@@ -19521,6 +19521,7 @@ es.styles = wo`
       background: var(--ha-card-background, rgba(15, 23, 42, 0.92));
       backdrop-filter: blur(14px);
       overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .hud.slide-over {
@@ -19528,7 +19529,8 @@ es.styles = wo`
       top: 12px;
       right: 12px;
       bottom: 12px;
-      width: min(350px, calc(100% - 24px));
+      width: clamp(360px, 34%, 480px);
+      max-width: calc(100% - 24px);
       border-radius: 14px;
       border: 1px solid rgba(148, 163, 184, 0.24);
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
@@ -19643,15 +19645,18 @@ es.styles = wo`
     .grid {
       display: grid;
       gap: 8px;
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .hud.fullscreen .grid {
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
     }
 
     .sensor-card,
     .appliance-card {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -19677,7 +19682,9 @@ es.styles = wo`
     }
 
     .entity-meta {
+      flex: 1 1 auto;
       min-width: 0;
+      overflow: hidden;
     }
 
     .entity-name {
@@ -19697,6 +19704,10 @@ es.styles = wo`
     }
 
     .entity-state {
+      flex-shrink: 0;
+      max-width: 45%;
+      overflow: hidden;
+      text-overflow: ellipsis;
       font-size: 0.85rem;
       font-weight: 700;
       text-align: right;
@@ -19707,6 +19718,7 @@ es.styles = wo`
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .pill-toggle {
@@ -20654,7 +20666,7 @@ let yt = class extends hi {
               <span>${this._config.title ?? "My 3D Home"}</span>
               ${this._localFileName ? Ne`<small>(Uploaded: ${this._localFileName})</small>` : Fe}
             </div>
-            ${this._selectedAreaId || e ? Ne`
+            ${this._selectedAreaId || e && this._config.debug_picker ? Ne`
                   <div class="toolbar">
                     ${this._selectedAreaId ? Ne`<button @click=${this.clearSelection}>↺ Home Overview</button>` : Ne`
                           <span>${t.length > 0 ? "Click an area to inspect" : "Orbit & zoom to frame"}</span>

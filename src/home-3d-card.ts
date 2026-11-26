@@ -539,7 +539,7 @@ export class Home3DCard extends LitElement {
               <span>${this._config.title ?? 'My 3D Home'}</span>
               ${this._localFileName ? html`<small>(Uploaded: ${this._localFileName})</small>` : nothing}
             </div>
-            ${this._selectedAreaId || activeUrl
+            ${this._selectedAreaId || (activeUrl && this._config.debug_picker)
               ? html`
                   <div class="toolbar">
                     ${this._selectedAreaId

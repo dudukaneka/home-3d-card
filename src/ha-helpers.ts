@@ -123,8 +123,11 @@ export function formatEntityState(entity: HassEntity): string {
       return `${entity.state} · ${target}°${current !== undefined ? ` (${current}°)` : ''}`;
     }
   }
+  const rawState = /^-?\d+\.\d{4,}$/.test(entity.state.trim())
+    ? Number(entity.state).toFixed(2)
+    : entity.state;
   const unit = entity.attributes.unit_of_measurement;
-  return unit ? `${entity.state} ${unit}` : entity.state;
+  return unit ? `${rawState} ${unit}` : rawState;
 }
 
 export async function toggleAppliance(

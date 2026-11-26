@@ -1,5 +1,9 @@
 # Changelog & Project Log
 
+## [0.5.1] - 2026-11-26 (Toolbar Visibility & Slide-over Width Polish)
+- **Debug Toolbar Gating:** Hid the overview toolbar (`Click an area to inspect · ⌖ Set Default · ↺ Auto`) unless `debug_picker` is enabled (or an area is selected to show `↺ Home Overview`).
+- **Slide-over Width & Overflow Fix:** Widened `.hud.slide-over` responsively (`clamp(360px, 34%, 480px)`), enforced `minmax(0, 1fr)` grid tracks and `min-width: 0` truncation with `overflow-x: hidden` to eliminate horizontal scrollbars, and rounded 4+ decimal sensor floats cleanly to 2 decimals in `formatEntityState()`.
+
 ## [0.5.0] - 2026-11-26 (Default Camera Position & Zoom)
 - **Remember First-Load Camera View (`default_view`):** Added **⌖ Set Default** and **↺ Auto** buttons in the card toolbar, `SceneManager.getCameraPose()` / `setDefaultView()`, browser `localStorage` persistence (`saveDefaultView` / `loadDefaultView`), and live sync into `default_view` in the Lovelace visual editor (`home-3d-editor.ts`) so your preferred starting angle and zoom persist across reloads and devices.
 
