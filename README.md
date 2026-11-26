@@ -10,6 +10,7 @@ Point it at **any** `.glb` 3D home model (exported from SolidCraft, Blender, Fus
 - **Drag-and-Drop / Upload `.glb`:** Upload any `.glb` directly inside the card onboarding view or Lovelace visual editor (`idb://<filename>`, persisted in browser IndexedDB), or host in `/config/www/` (`/local/...`) for automatic multi-device sync.
 - **Visual Mesh & Area Mapper:** Inspect any `.glb` right inside the Lovelace Card Editor (`Upload .glb` or `Inspect URL`), auto-create areas, click mesh chips, and bind each area to a Home Assistant Area (`hass.areas`) without writing YAML.
 - **Convention Auto-Mapping:** Name meshes/nodes `area_<ha_area_id>` or `zone_<ha_area_id>` in your CAD/3D software (e.g. `area_kitchen`, `zone_patio`) and the card maps them automatically (`auto_map_area_meshes: true`).
+- **Remember First-Load Camera View:** Orbit, pan, and zoom to your ideal overview and click **⌖ Set Default** on the card toolbar to remember it across reloads (and sync into `default_view` in the card config for all devices).
 - **Slide-over & Fullscreen HUD Modes:** Defaults to `slide-over` beside the zoomed 3D area, with `fullscreen` configurable in Lovelace card settings (`panel_mode`).
 - **Built-in Debug Coordinate Picker:** Enable `debug_picker: true` to click anywhere on the floorplan and read normalized `[normX, normZ]` coordinates for open-plan zones.
 

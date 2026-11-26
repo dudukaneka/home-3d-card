@@ -1,8 +1,10 @@
 import { parseGlbMetadata } from './model-utils';
+import type { CameraPoseConfig } from './types';
 
 const DB_NAME = 'home-3d-card-db';
 const DB_VERSION = 1;
 const STORE_NAME = 'models';
+const VIEW_STORAGE_PREFIX = 'home-3d-default-view:';
 
 export interface UploadedModelMeta {
   name: string;
@@ -19,6 +21,106 @@ interface StoredModelRecord {
 }
 
 const memoryFallback = new Map<string, StoredModelRecord>();
+const viewMemoryFallback = new Map<string, CameraPoseConfig>();
+
+function isValidVec3(val: unknown): val is [number, number, number] {
+  return (
+    Array.isArray(val) &&
+    val.length === 3 &&
+    val.every((n) => typeof n === 'number' && Number.isFinite(n))
+  );
+}
+
+export function normalizeCameraPose(pose: CameraPoseConfig): CameraPoseConfig {
+  return {
+    position: [
+      Number(pose.position[0].toFixed(3)),
+      Number(pose.position[1].toFixed(3)),
+      Number(pose.position[2].toFixed(3)),
+    ],
+    target: [
+      Number(pose.target[0].toFixed(3)),
+      Number(pose.target[1].toFixed(3)),
+      Number(pose.target[2].toFixed(3)),
+    ],
+  };
+}
+
+function getBrowserStorage(): Storage | null {
+  try {
+    if (typeof globalThis.localStorage !== 'undefined' && typeof globalThis.localStorage.getItem === 'function') {
+      return globalThis.localStorage;
+    }
+  } catch {
+    // Node experimental localStorage getter without --localstorage-file
+  }
+  return null;
+}
+
+export function saveDefaultView(modelUrl: string, pose: CameraPoseConfig): CameraPoseConfig {
+  const cleanUrl = modelUrl.trim();
+  const normalized = normalizeCameraPose(pose);
+  if (!cleanUrl) return normalized;
+
+  const key = `${VIEW_STORAGE_PREFIX}${cleanUrl}`;
+  const storage = getBrowserStorage();
+  if (storage) {
+    storage.setItem(key, JSON.stringify(normalized));
+  } else {
+    viewMemoryFallback.set(key, normalized);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('home-3d-default-view-changed', {
+        detail: { modelUrl: cleanUrl, pose: normalized },
+      }),
+    );
+  }
+  return normalized;
+}
+
+export function loadDefaultView(modelUrl?: string): CameraPoseConfig | null {
+  const cleanUrl = modelUrl?.trim();
+  if (!cleanUrl) return null;
+
+  const key = `${VIEW_STORAGE_PREFIX}${cleanUrl}`;
+  const storage = getBrowserStorage();
+  if (!storage) {
+    return viewMemoryFallback.get(key) ?? null;
+  }
+
+  try {
+    const raw = storage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<CameraPoseConfig>;
+    if (isValidVec3(parsed.position) && isValidVec3(parsed.target)) {
+      return { position: parsed.position, target: parsed.target };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearDefaultView(modelUrl?: string): void {
+  const cleanUrl = modelUrl?.trim();
+  if (!cleanUrl) return;
+  const key = `${VIEW_STORAGE_PREFIX}${cleanUrl}`;
+  const storage = getBrowserStorage();
+  if (storage) {
+    storage.removeItem(key);
+  } else {
+    viewMemoryFallback.delete(key);
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('home-3d-default-view-changed', {
+        detail: { modelUrl: cleanUrl, pose: null },
+      }),
+    );
+  }
+}
 
 export function isIdbModelUrl(url?: string): boolean {
   return Boolean(url && url.startsWith('idb://'));

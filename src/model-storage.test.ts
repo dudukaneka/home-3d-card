@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  clearDefaultView,
   deleteUploadedModel,
   getIdbModelName,
   isIdbModelUrl,
   listUploadedModels,
+  loadDefaultView,
   loadUploadedModel,
+  saveDefaultView,
   saveUploadedModel,
 } from './model-storage';
 
@@ -57,5 +60,23 @@ describe('model-storage', () => {
   it('rejects non-GLB payloads before saving', async () => {
     const invalid = new TextEncoder().encode('not a glb').buffer;
     await expect(saveUploadedModel('bad.glb', invalid)).rejects.toThrow();
+  });
+
+  it('saves, rounds, loads, and clears default camera view per model URL', () => {
+    const saved = saveDefaultView('/local/home-3d/house.glb', {
+      position: [4.123456, 7.987654, 9.5555],
+      target: [0.1111, 0.5, -1.23456],
+    });
+
+    expect(saved).toEqual({
+      position: [4.123, 7.988, 9.556],
+      target: [0.111, 0.5, -1.235],
+    });
+
+    expect(loadDefaultView('/local/home-3d/house.glb')).toEqual(saved);
+    expect(loadDefaultView('/local/home-3d/other.glb')).toBeNull();
+
+    clearDefaultView('/local/home-3d/house.glb');
+    expect(loadDefaultView('/local/home-3d/house.glb')).toBeNull();
   });
 });

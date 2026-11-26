@@ -1,5 +1,8 @@
 # Changelog & Project Log
 
+## [0.5.0] - 2026-11-26 (Default Camera Position & Zoom)
+- **Remember First-Load Camera View (`default_view`):** Added **⌖ Set Default** and **↺ Auto** buttons in the card toolbar, `SceneManager.getCameraPose()` / `setDefaultView()`, browser `localStorage` persistence (`saveDefaultView` / `loadDefaultView`), and live sync into `default_view` in the Lovelace visual editor (`home-3d-editor.ts`) so your preferred starting angle and zoom persist across reloads and devices.
+
 ## [0.4.1] - 2026-11-26 (Home Assistant Marketplace Standard)
 - **Marketplace Documentation:** Updated README, CI workflow labels, and decision logs from HACS to Home Assistant 2026.11's native **Marketplace** standard (`Settings → Marketplace`).
 

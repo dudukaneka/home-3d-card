@@ -8,7 +8,13 @@ import {
   normalizeModelRoot,
   worldPointToNormalizedXZ,
 } from './model-utils';
-import type { AreaConfig, DebugPickInfo, ProjectedAreaLabel, UpAxisMode } from './types';
+import type {
+  AreaConfig,
+  CameraPoseConfig,
+  DebugPickInfo,
+  ProjectedAreaLabel,
+  UpAxisMode,
+} from './types';
 
 interface AreaVolume {
   config: AreaConfig;
@@ -33,6 +39,7 @@ export interface SceneManagerOptions {
   showZoneOverlay: boolean;
   debugPicker: boolean;
   darkMode: boolean;
+  defaultView?: CameraPoseConfig | null;
   onAreaSelect: (areaId: string | null) => void;
   onAreaHover: (areaId: string | null) => void;
   onLabelsUpdate: (labels: ProjectedAreaLabel[]) => void;
@@ -60,6 +67,8 @@ export class SceneManager {
   private areaVolumes: AreaVolume[] = [];
   private originalMaterials = new Map<THREE.Material, MaterialSnapshot>();
 
+  private autoOverviewTarget = new THREE.Vector3(0, 0.5, 0);
+  private autoOverviewPosition = new THREE.Vector3(8, 9, 10);
   private overviewTarget = new THREE.Vector3(0, 0.5, 0);
   private overviewPosition = new THREE.Vector3(8, 9, 10);
   private targetGoal = new THREE.Vector3();
@@ -159,7 +168,36 @@ export class SceneManager {
     if (partial.darkMode !== undefined) {
       this.applyTheme(partial.darkMode);
     }
+    if (partial.defaultView !== undefined) {
+      this.setDefaultView(partial.defaultView);
+    }
     this.refreshVisualHighlights();
+  }
+
+  public getCameraPose(): CameraPoseConfig {
+    return {
+      position: [
+        Number(this.camera.position.x.toFixed(3)),
+        Number(this.camera.position.y.toFixed(3)),
+        Number(this.camera.position.z.toFixed(3)),
+      ],
+      target: [
+        Number(this.controls.target.x.toFixed(3)),
+        Number(this.controls.target.y.toFixed(3)),
+        Number(this.controls.target.z.toFixed(3)),
+      ],
+    };
+  }
+
+  public setDefaultView(pose?: CameraPoseConfig | null): void {
+    this.options.defaultView = pose ?? null;
+    if (pose) {
+      this.overviewPosition.set(...pose.position);
+      this.overviewTarget.set(...pose.target);
+    } else {
+      this.overviewPosition.copy(this.autoOverviewPosition);
+      this.overviewTarget.copy(this.autoOverviewTarget);
+    }
   }
 
   public async loadModel(url: string, areas: AreaConfig[]): Promise<void> {
@@ -225,10 +263,19 @@ export class SceneManager {
         [0.42, 0.96, 0.92],
         1.1,
       );
-      this.overviewTarget.copy(overviewPose.target);
-      this.overviewPosition.copy(overviewPose.position);
-      this.camera.position.copy(overviewPose.position);
-      this.controls.target.copy(overviewPose.target);
+      this.autoOverviewTarget.copy(overviewPose.target);
+      this.autoOverviewPosition.copy(overviewPose.position);
+
+      if (this.options.defaultView) {
+        this.overviewTarget.set(...this.options.defaultView.target);
+        this.overviewPosition.set(...this.options.defaultView.position);
+      } else {
+        this.overviewTarget.copy(overviewPose.target);
+        this.overviewPosition.copy(overviewPose.position);
+      }
+
+      this.camera.position.copy(this.overviewPosition);
+      this.controls.target.copy(this.overviewTarget);
       this.controls.update();
 
       this.setAreas(areas);

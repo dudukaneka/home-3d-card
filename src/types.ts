@@ -83,6 +83,11 @@ export interface AreaConfig {
   appliances?: string[];
 }
 
+export interface CameraPoseConfig {
+  position: [number, number, number];
+  target: [number, number, number];
+}
+
 export interface Home3DCardConfig {
   type: string;
   title?: string;
@@ -95,6 +100,7 @@ export interface Home3DCardConfig {
   show_zone_overlay?: boolean;
   auto_map_area_meshes?: boolean;
   debug_picker?: boolean;
+  default_view?: CameraPoseConfig;
   areas?: AreaConfig[];
 }
 

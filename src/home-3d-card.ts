@@ -1,13 +1,20 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { resolveAreaEntities } from './ha-helpers';
-import { isIdbModelUrl, saveUploadedModel } from './model-storage';
+import {
+  clearDefaultView,
+  isIdbModelUrl,
+  loadDefaultView,
+  saveDefaultView,
+  saveUploadedModel,
+} from './model-storage';
 import { autoDiscoverAreasFromMeshes } from './model-utils';
 import { SceneManager } from './scene-manager';
 import './area-hud';
 import './home-3d-editor';
 import type {
   AreaConfig,
+  CameraPoseConfig,
   DebugPickInfo,
   Home3DCardConfig,
   HomeAssistant,
@@ -31,9 +38,11 @@ export class Home3DCard extends LitElement {
   @state() private _localUploadedUrl: string | null = null;
   @state() private _localFileName: string | null = null;
   @state() private _dragActive = false;
+  @state() private _viewSavedFlash = false;
 
   private sceneManager?: SceneManager;
   private loadedModelUrl: string | null = null;
+  private viewSavedTimer?: number;
 
   public static getConfigElement(): HTMLElement {
     return document.createElement('home-3d-card-editor');
@@ -85,6 +94,7 @@ export class Home3DCard extends LitElement {
         showZoneOverlay: this._config.show_zone_overlay !== false,
         debugPicker: Boolean(this._config.debug_picker),
         darkMode: Boolean(this.hass?.themes?.darkMode ?? true),
+        defaultView: this.getEffectiveDefaultView(),
       });
 
       const activeUrl = this.getActiveModelUrl();
@@ -322,6 +332,19 @@ export class Home3DCard extends LitElement {
     return this._config?.model_url?.trim() || this._localUploadedUrl || '';
   }
 
+  private getEffectiveDefaultView(): CameraPoseConfig | null {
+    return this._config?.default_view ?? loadDefaultView(this.getActiveModelUrl());
+  }
+
+  private handleExternalViewChange = (ev: Event): void => {
+    const detail = (ev as CustomEvent<{ modelUrl: string; pose: CameraPoseConfig | null }>).detail;
+    if (!detail || detail.modelUrl !== this.getActiveModelUrl()) return;
+    if (this.sceneManager && !this._config?.default_view) {
+      this.sceneManager.setDefaultView(detail.pose);
+    }
+    this.requestUpdate();
+  };
+
   private getEffectiveAreas(): AreaConfig[] {
     const explicit = this._config?.areas ?? [];
     if (this._config?.auto_map_area_meshes === false) {
@@ -339,6 +362,8 @@ export class Home3DCard extends LitElement {
     const host = this.renderRoot.querySelector('.canvas-host') as HTMLElement | null;
     if (!host || !this._config) return;
 
+    window.addEventListener('home-3d-default-view-changed', this.handleExternalViewChange);
+
     this.sceneManager = new SceneManager({
       container: host,
       upAxis: this._config.up_axis ?? 'auto',
@@ -346,6 +371,7 @@ export class Home3DCard extends LitElement {
       showZoneOverlay: this._config.show_zone_overlay !== false,
       debugPicker: Boolean(this._config.debug_picker),
       darkMode: Boolean(this.hass?.themes?.darkMode ?? true),
+      defaultView: this.getEffectiveDefaultView(),
       onAreaSelect: (areaId) => {
         this._selectedAreaId = areaId;
       },
@@ -383,6 +409,10 @@ export class Home3DCard extends LitElement {
 
   public disconnectedCallback(): void {
     super.disconnectedCallback();
+    window.removeEventListener('home-3d-default-view-changed', this.handleExternalViewChange);
+    if (this.viewSavedTimer) {
+      window.clearTimeout(this.viewSavedTimer);
+    }
     this.sceneManager?.dispose();
     this.sceneManager = undefined;
   }
@@ -443,6 +473,44 @@ export class Home3DCard extends LitElement {
     this.sceneManager?.resetView();
   };
 
+  private handleSaveDefaultView = (): void => {
+    const activeUrl = this.getActiveModelUrl();
+    if (!this.sceneManager || !activeUrl || !this._config) return;
+    const pose = saveDefaultView(activeUrl, this.sceneManager.getCameraPose());
+    this.sceneManager.setDefaultView(pose);
+    this._config = { ...this._config, default_view: pose };
+    this._viewSavedFlash = true;
+    if (this.viewSavedTimer) window.clearTimeout(this.viewSavedTimer);
+    this.viewSavedTimer = window.setTimeout(() => {
+      this._viewSavedFlash = false;
+    }, 2200);
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: { config: this._config },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  };
+
+  private handleClearDefaultView = (): void => {
+    const activeUrl = this.getActiveModelUrl();
+    if (!this.sceneManager || !this._config) return;
+    clearDefaultView(activeUrl);
+    const nextConfig: Home3DCardConfig = { ...this._config };
+    delete nextConfig.default_view;
+    this._config = nextConfig;
+    this.sceneManager.setDefaultView(null);
+    this.sceneManager.resetView();
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: { config: nextConfig },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  };
+
   private handleModeChange = (e: CustomEvent<{ mode: PanelMode }>): void => {
     this._panelModeOverride = e.detail.mode;
   };
@@ -476,7 +544,25 @@ export class Home3DCard extends LitElement {
                   <div class="toolbar">
                     ${this._selectedAreaId
                       ? html`<button @click=${this.clearSelection}>↺ Home Overview</button>`
-                      : html`<span>${effectiveAreas.length > 0 ? 'Click an area to inspect' : 'No areas mapped yet'}</span>`}
+                      : html`
+                          <span>${effectiveAreas.length > 0 ? 'Click an area to inspect' : 'Orbit & zoom to frame'}</span>
+                          <button
+                            @click=${this.handleSaveDefaultView}
+                            title="Remember current camera position and zoom for first load"
+                          >
+                            ${this._viewSavedFlash ? '✓ Default Saved' : '⌖ Set Default'}
+                          </button>
+                          ${this.getEffectiveDefaultView()
+                            ? html`
+                                <button
+                                  @click=${this.handleClearDefaultView}
+                                  title="Reset first-load camera to automatic fit"
+                                >
+                                  ↺ Auto
+                                </button>
+                              `
+                            : nothing}
+                        `}
                   </div>
                 `
               : nothing}

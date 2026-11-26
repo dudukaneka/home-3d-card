@@ -1,15 +1,24 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
+  clearDefaultView,
   deleteUploadedModel,
   isIdbModelUrl,
   listUploadedModels,
+  loadDefaultView,
   loadUploadedModel,
   saveUploadedModel,
   type UploadedModelMeta,
 } from './model-storage';
 import { autoDiscoverAreasFromMeshes, parseGlbMetadata } from './model-utils';
-import type { AreaConfig, Home3DCardConfig, HomeAssistant, PanelMode, UpAxisMode } from './types';
+import type {
+  AreaConfig,
+  CameraPoseConfig,
+  Home3DCardConfig,
+  HomeAssistant,
+  PanelMode,
+  UpAxisMode,
+} from './types';
 
 const PALETTE = ['#38bdf8', '#34d399', '#fbbf24', '#a78bfa', '#fb7185', '#2dd4bf'];
 
@@ -22,9 +31,34 @@ export class Home3DCardEditor extends LitElement {
   @state() private _inspectStatus: string | null = null;
   @state() private _inspectError: string | null = null;
   @state() private _dragActive = false;
+  @state() private _capturedView: CameraPoseConfig | null = null;
+
+  public connectedCallback(): void {
+    super.connectedCallback();
+    window.addEventListener('home-3d-default-view-changed', this.handleViewChangedEvent);
+  }
+
+  public disconnectedCallback(): void {
+    super.disconnectedCallback();
+    window.removeEventListener('home-3d-default-view-changed', this.handleViewChangedEvent);
+  }
+
+  private handleViewChangedEvent = (ev: Event): void => {
+    const detail = (ev as CustomEvent<{ modelUrl: string; pose: CameraPoseConfig | null }>).detail;
+    if (!detail || detail.modelUrl !== this._config?.model_url?.trim()) return;
+    this._capturedView = detail.pose;
+    if (detail.pose) {
+      this.updateField('default_view', detail.pose);
+    } else if (this._config?.default_view) {
+      const next = { ...this._config };
+      delete next.default_view;
+      this.emitConfig(next);
+    }
+  };
 
   public setConfig(config: Home3DCardConfig): void {
     this._config = { ...config };
+    this._capturedView = loadDefaultView(config.model_url);
     void this.refreshUploadedModels();
   }
 
@@ -507,6 +541,49 @@ export class Home3DCardEditor extends LitElement {
 
         ${this._inspectStatus ? html`<div class="status">${this._inspectStatus}</div>` : nothing}
         ${this._inspectError ? html`<div class="status error">${this._inspectError}</div>` : nothing}
+
+        <div class="dropzone">
+          <span>
+            <strong>Default Camera View:</strong>
+            ${this._config.default_view
+              ? html`Saved in card config (pos: ${this._config.default_view.position.join(', ')})`
+              : this._capturedView
+                ? html`Captured from card preview — click <em>Apply to Config</em> &amp; Save`
+                : html`Auto-fit on first load (orbit/zoom card &amp; click <code>⌖ Set Default</code>)`}
+          </span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${this._capturedView
+              ? html`
+                  <button
+                    type="button"
+                    class="btn primary"
+                    @click=${() => this.updateField('default_view', this._capturedView!)}
+                  >
+                    Apply to Config
+                  </button>
+                `
+              : nothing}
+            ${this._config.default_view || this._capturedView
+              ? html`
+                  <button
+                    type="button"
+                    class="btn"
+                    @click=${() => {
+                      clearDefaultView(this._config?.model_url);
+                      this._capturedView = null;
+                      if (this._config) {
+                        const next = { ...this._config };
+                        delete next.default_view;
+                        this.emitConfig(next);
+                      }
+                    }}
+                  >
+                    Reset Auto
+                  </button>
+                `
+              : nothing}
+          </div>
+        </div>
 
         <div class="row">
           <label class="field">
