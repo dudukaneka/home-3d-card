@@ -22,11 +22,11 @@ Point it at **any** `.glb` 3D home model (exported from SolidCraft, Blender, Fus
 2. Click **⋮ (top-right) → Custom repositories**.
 3. Add `https://github.com/dudukaneka/home-3d-card` with category **Dashboard** (or **Lovelace**), then click **Download**.
 4. Reload your browser when prompted.
-4. *(For multi-device `.glb` hosting)* Copy your personal `.glb` model into Home Assistant at:
+4. *(For multi-device `.glb` hosting)* Copy your personal `.glb` model into Home Assistant's default 3D folder:
    ```text
-   /config/www/home-3d/my-home.glb
+   /config/www/home-3d/home.glb
    ```
-   *(Served as `/local/home-3d/my-home.glb`—or drag-and-drop/upload your `.glb` directly in the card editor.)*
+   *(New cards default to `/local/home-3d/home.glb`, and entering just a filename like `my-home.glb` automatically resolves to `/local/home-3d/my-home.glb`.)*
 5. Add **Home 3D Dashboard Card** to any dashboard and configure your areas visually or via YAML:
 
 ```yaml

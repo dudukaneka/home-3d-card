@@ -1,5 +1,8 @@
 # Changelog & Project Log
 
+## [0.5.2] - 2026-11-27 (Default `/config/www/home-3d/` Path)
+- **Server-Default Model Path:** Set `DEFAULT_MODEL_URL` to `/local/home-3d/home.glb` (backed by `/config/www/home-3d/` on Home Assistant) and added `resolveModelUrl()` so entering just a filename (e.g. `my-home.glb`) automatically resolves to `/local/home-3d/my-home.glb`.
+
 ## [0.5.1] - 2026-11-26 (Toolbar Visibility & Slide-over Width Polish)
 - **Debug Toolbar Gating:** Hid the overview toolbar (`Click an area to inspect · ⌖ Set Default · ↺ Auto`) unless `debug_picker` is enabled (or an area is selected to show `↺ Home Overview`).
 - **Slide-over Width & Overflow Fix:** Widened `.hud.slide-over` responsively (`clamp(360px, 34%, 480px)`), enforced `minmax(0, 1fr)` grid tracks and `min-width: 0` truncation with `overflow-x: hidden` to eliminate horizontal scrollbars, and rounded 4+ decimal sensor floats cleanly to 2 decimals in `formatEntityState()`.

@@ -8,7 +8,7 @@ import {
   saveDefaultView,
   saveUploadedModel,
 } from './model-storage';
-import { autoDiscoverAreasFromMeshes } from './model-utils';
+import { autoDiscoverAreasFromMeshes, DEFAULT_MODEL_URL, resolveModelUrl } from './model-utils';
 import { SceneManager } from './scene-manager';
 import './area-hud';
 import './home-3d-editor';
@@ -52,7 +52,7 @@ export class Home3DCard extends LitElement {
     return {
       type: 'custom:home-3d-card',
       title: 'My 3D Home',
-      model_url: '',
+      model_url: DEFAULT_MODEL_URL,
       panel_mode: 'slide-over',
       up_axis: 'auto',
       card_height: 560,
@@ -329,7 +329,7 @@ export class Home3DCard extends LitElement {
   `;
 
   private getActiveModelUrl(): string {
-    return this._config?.model_url?.trim() || this._localUploadedUrl || '';
+    return resolveModelUrl(this._config?.model_url) || this._localUploadedUrl || '';
   }
 
   private getEffectiveDefaultView(): CameraPoseConfig | null {
@@ -637,14 +637,18 @@ export class Home3DCard extends LitElement {
             ? html`
                 <div class="status-banner error">
                   <div>${this._error}</div>
-                  ${isIdbModelUrl(activeUrl)
+                  ${!isIdbModelUrl(activeUrl)
                     ? html`
-                        <label class="upload-btn">
-                          Upload .glb File Here
-                          <input type="file" accept=".glb" @change=${this.handleLocalFileSelect} />
-                        </label>
+                        <div style="font-size:0.8rem; opacity:0.88; line-height:1.4;">
+                          Place your <code>.glb</code> inside <code>/config/www/home-3d/</code>
+                          (served at <code>/local/home-3d/</code>), or upload into this browser:
+                        </div>
                       `
                     : nothing}
+                  <label class="upload-btn">
+                    Upload .glb File Here
+                    <input type="file" accept=".glb" @change=${this.handleLocalFileSelect} />
+                  </label>
                 </div>
               `
             : nothing}

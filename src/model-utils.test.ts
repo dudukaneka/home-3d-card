@@ -4,9 +4,11 @@ import {
   autoDiscoverAreasFromMeshes,
   CANONICAL_HORIZONTAL_SPAN,
   computeFocusCameraPose,
+  DEFAULT_MODEL_URL,
   normalizedFootprintToBox3,
   normalizeModelRoot,
   parseGlbMetadata,
+  resolveModelUrl,
   shouldConvertZUpToYUp,
   worldPointToNormalizedXZ,
 } from './model-utils';
@@ -110,5 +112,14 @@ describe('model-utils', () => {
       ha_area_id: 'patio',
       mesh_names: ['zone_patio'],
     });
+  });
+
+  it('resolves bare filenames to /local/home-3d/ while preserving explicit URLs', () => {
+    expect(DEFAULT_MODEL_URL).toBe('/local/home-3d/home.glb');
+    expect(resolveModelUrl('my-home.glb')).toBe('/local/home-3d/my-home.glb');
+    expect(resolveModelUrl('./floor1.glb')).toBe('/local/home-3d/floor1.glb');
+    expect(resolveModelUrl('/local/custom/house.glb')).toBe('/local/custom/house.glb');
+    expect(resolveModelUrl('idb://house.glb')).toBe('idb://house.glb');
+    expect(resolveModelUrl('')).toBe('');
   });
 });

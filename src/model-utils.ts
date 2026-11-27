@@ -2,7 +2,26 @@ import * as THREE from 'three';
 import type { AreaConfig, HassArea, UpAxisMode } from './types';
 
 export const CANONICAL_HORIZONTAL_SPAN = 12;
+export const DEFAULT_LOCAL_MODEL_DIR = '/local/home-3d/';
+export const DEFAULT_MODEL_URL = '/local/home-3d/home.glb';
 const AREA_PALETTE = ['#38bdf8', '#34d399', '#fbbf24', '#a78bfa', '#fb7185', '#2dd4bf'];
+
+/**
+ * Resolves a user-entered model path or bare filename.
+ * Bare filenames (e.g. `my-home.glb`) default to `/local/home-3d/<filename>`,
+ * which maps to `/config/www/home-3d/<filename>` on Home Assistant.
+ */
+export function resolveModelUrl(input?: string): string {
+  const trimmed = input?.trim() ?? '';
+  if (!trimmed) return '';
+  if (
+    trimmed.startsWith('/') ||
+    /^(https?:|blob:|data:|idb:)/i.test(trimmed)
+  ) {
+    return trimmed;
+  }
+  return `${DEFAULT_LOCAL_MODEL_DIR}${trimmed.replace(/^\.\//, '')}`;
+}
 
 export interface GlbMetadata {
   generator?: string;

@@ -1,6 +1,6 @@
 {
   "name": "home-3d-card",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": false,
   "description": "Custom Home Assistant Lovelace 3D Dashboard Card with click-to-maximize area sensors and appliances",
   "type": "module",

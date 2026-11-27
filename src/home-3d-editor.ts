@@ -10,7 +10,12 @@ import {
   saveUploadedModel,
   type UploadedModelMeta,
 } from './model-storage';
-import { autoDiscoverAreasFromMeshes, parseGlbMetadata } from './model-utils';
+import {
+  autoDiscoverAreasFromMeshes,
+  DEFAULT_MODEL_URL,
+  parseGlbMetadata,
+  resolveModelUrl,
+} from './model-utils';
 import type {
   AreaConfig,
   CameraPoseConfig,
@@ -45,7 +50,7 @@ export class Home3DCardEditor extends LitElement {
 
   private handleViewChangedEvent = (ev: Event): void => {
     const detail = (ev as CustomEvent<{ modelUrl: string; pose: CameraPoseConfig | null }>).detail;
-    if (!detail || detail.modelUrl !== this._config?.model_url?.trim()) return;
+    if (!detail || detail.modelUrl !== resolveModelUrl(this._config?.model_url)) return;
     this._capturedView = detail.pose;
     if (detail.pose) {
       this.updateField('default_view', detail.pose);
@@ -58,7 +63,7 @@ export class Home3DCardEditor extends LitElement {
 
   public setConfig(config: Home3DCardConfig): void {
     this._config = { ...config };
-    this._capturedView = loadDefaultView(config.model_url);
+    this._capturedView = loadDefaultView(resolveModelUrl(config.model_url));
     void this.refreshUploadedModels();
   }
 
@@ -314,9 +319,9 @@ export class Home3DCardEditor extends LitElement {
   }
 
   private handleInspectUrl = async (): Promise<void> => {
-    const url = this._config?.model_url?.trim();
+    const url = resolveModelUrl(this._config?.model_url);
     if (!url) {
-      this._inspectError = 'Enter a Model URL or upload a .glb file first.';
+      this._inspectError = 'Enter a filename/URL or upload a .glb file first.';
       return;
     }
     try {
@@ -527,10 +532,10 @@ export class Home3DCardEditor extends LitElement {
 
         <div class="model-bar">
           <label class="field">
-            3D Model URL (<code>/local/...</code> or <code>idb://...</code>)
+            3D Model File or URL (bare filenames default to <code>/config/www/home-3d/</code>)
             <input
               type="text"
-              placeholder="/local/home-3d/my-home.glb"
+              placeholder="${DEFAULT_MODEL_URL} (or just my-home.glb)"
               .value=${this._config.model_url ?? ''}
               @input=${(e: Event) =>
                 this.updateField('model_url', (e.target as HTMLInputElement).value)}
@@ -569,7 +574,7 @@ export class Home3DCardEditor extends LitElement {
                     type="button"
                     class="btn"
                     @click=${() => {
-                      clearDefaultView(this._config?.model_url);
+                      clearDefaultView(resolveModelUrl(this._config?.model_url));
                       this._capturedView = null;
                       if (this._config) {
                         const next = { ...this._config };
